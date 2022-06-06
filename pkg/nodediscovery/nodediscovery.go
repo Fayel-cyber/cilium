@@ -39,6 +39,7 @@ import (
 	"github.com/cilium/cilium/pkg/node/addressing"
 	nodemanager "github.com/cilium/cilium/pkg/node/manager"
 	nodestore "github.com/cilium/cilium/pkg/node/store"
+	"github.com/cilium/cilium/pkg/node/types"
 	nodeTypes "github.com/cilium/cilium/pkg/node/types"
 	"github.com/cilium/cilium/pkg/option"
 	"github.com/cilium/cilium/pkg/source"
@@ -313,6 +314,13 @@ func (n *NodeDiscovery) updateLocalNode() {
 	}
 }
 
+func (n *NodeDiscovery) FillLocalNode() {
+	n.localNodeLock.Lock()
+	defer n.localNodeLock.Unlock()
+
+	n.fillLocalNode()
+}
+
 // UpdateLocalNode syncs the internal localNode object with the actual state of
 // the local node and publishes the corresponding updated KV store entry and/or
 // CiliumNode object
@@ -322,6 +330,13 @@ func (n *NodeDiscovery) UpdateLocalNode() {
 
 	n.fillLocalNode()
 	n.updateLocalNode()
+}
+
+func (n *NodeDiscovery) LocalNode() types.Node {
+	n.localNodeLock.Lock()
+	defer n.localNodeLock.Unlock()
+
+	return n.localNode
 }
 
 // Close shuts down the node discovery engine

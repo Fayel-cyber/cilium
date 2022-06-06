@@ -21,6 +21,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 
+	"github.com/cilium/cilium/pkg/datapath"
 	"github.com/cilium/cilium/pkg/datapath/linux/linux_defaults"
 	"github.com/cilium/cilium/pkg/datapath/linux/route"
 	"github.com/cilium/cilium/pkg/fswatcher"
@@ -706,7 +707,7 @@ func DeleteIPsecEncryptRoute() {
 	}
 }
 
-func keyfileWatcher(ctx context.Context, watcher *fswatcher.Watcher, keyfilePath string, nodediscovery *nodediscovery.NodeDiscovery) {
+func keyfileWatcher(ctx context.Context, watcher *fswatcher.Watcher, keyfilePath string, nodediscovery *nodediscovery.NodeDiscovery, o datapath.BaseProgramOwner) {
 	for {
 		select {
 		case event := <-watcher.Events:
@@ -720,7 +721,21 @@ func keyfileWatcher(ctx context.Context, watcher *fswatcher.Watcher, keyfilePath
 				continue
 			}
 
+			// Update the IPSec key identity in the local node. This will set
+			// addrs.ipsecKeyIdentity in the node package
 			node.SetIPsecKeyIdentity(spi)
+
+			// Update the local node discovery state. This will copy
+			// addrs.ipsecKeyIdentity to nodediscovery.localNode.EncryptionKey
+			nodediscovery.FillLocalNode()
+
+			// NodeValidateImplementation will eventually call
+			// (*linuxNodeHandler).nodeUpdate() -> ipsec.UpsertIPsecEndpoint() ->
+			// ipsec.ipSecReplacePolicyOut() which is responsible for updating the IPSec
+			// policies for any EP
+			o.Datapath().Node().NodeValidateImplementation(nodediscovery.LocalNode())
+
+			// Publish the Updated node information to k8s/KVStore
 			nodediscovery.UpdateLocalNode()
 
 		case err := <-watcher.Errors:
@@ -734,13 +749,13 @@ func keyfileWatcher(ctx context.Context, watcher *fswatcher.Watcher, keyfilePath
 	}
 }
 
-func StartKeyfileWatcher(ctx context.Context, keyfilePath string, nodediscovery *nodediscovery.NodeDiscovery) error {
+func StartKeyfileWatcher(ctx context.Context, keyfilePath string, nodediscovery *nodediscovery.NodeDiscovery, o datapath.BaseProgramOwner) error {
 	watcher, err := fswatcher.New([]string{keyfilePath})
 	if err != nil {
 		return err
 	}
 
-	go keyfileWatcher(ctx, watcher, keyfilePath, nodediscovery)
+	go keyfileWatcher(ctx, watcher, keyfilePath, nodediscovery, o)
 
 	return nil
 }
