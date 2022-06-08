@@ -20,8 +20,8 @@ env:
   KIND_CONFIG: .github/kind-config-ipv6.yaml
   # Skip external traffic (e.g. 1.1.1.1 and www.google.com) due to no support for IPv6 in github action
   CONFORMANCE_TEMPLATE: examples/kubernetes/connectivity-check/connectivity-check-internal.yaml
-  TIMEOUT: 15m
-  LOG_TIME: 90m
+  TIMEOUT: 5m
+  LOG_TIME: 60m
 
 jobs:
   check_changes:
@@ -85,11 +85,11 @@ jobs:
           config: ${{ env.KIND_CONFIG }}
 
       - name: Wait for images to be available
-        timeout-minutes: 90
+        timeout-minutes: 60
         shell: bash
         run: |
           for image in cilium-ci operator-generic-ci hubble-relay-ci ; do
-            until docker manifest inspect quay.io/${{ github.repository_owner }}/$image:${{ steps.vars.outputs.tag }} &> /dev/null; do sleep 45s; done
+            until docker manifest inspect quay.io/cilium/$image:${{ steps.vars.outputs.tag }} &> /dev/null; do sleep 45s; done
           done
 
       - name: Install cilium chart
@@ -99,16 +99,16 @@ jobs:
             --set nodeinit.enabled=true \
             --set kubeProxyReplacement=strict \
             --set ipam.mode=kubernetes \
-            --set image.repository=quay.io/${{ github.repository_owner }}/cilium-ci \
+            --set image.repository=quay.io/cilium/cilium-ci \
             --set image.tag=${{ steps.vars.outputs.tag }} \
             --set image.pullPolicy=IfNotPresent \
             --set image.useDigest=false \
             --set hubble.relay.enabled=true \
-            --set hubble.relay.image.repository=quay.io/${{ github.repository_owner }}/hubble-relay-ci \
+            --set hubble.relay.image.repository=quay.io/cilium/hubble-relay-ci \
             --set hubble.relay.image.tag=${{ steps.vars.outputs.tag }} \
             --set hubble.relay.image.pullPolicy=IfNotPresent \
             --set hubble.relay.image.useDigest=false \
-            --set operator.image.repository=quay.io/${{ github.repository_owner }}/operator \
+            --set operator.image.repository=quay.io/cilium/operator \
             --set operator.image.suffix=-ci \
             --set operator.image.tag=${{ steps.vars.outputs.tag }} \
             --set operator.image.pullPolicy=IfNotPresent \
@@ -121,8 +121,8 @@ jobs:
             --set ingressController.enabled=true
 
           kubectl wait -n kube-system --for=condition=Ready --all pod --timeout=${{ env.TIMEOUT }}
-          # To make sure that cilium CRD is available (default timeout is 15m)
-          kubectl wait --for condition=Established crd/ciliumnetworkpolicies.cilium.io --timeout=15m
+          # To make sure that cilium CRD is available (default timeout is 5m)
+          kubectl wait --for condition=Established crd/ciliumnetworkpolicies.cilium.io --timeout=5m
 
           kubectl port-forward -n kube-system deployment/hubble-relay 4245:4245 &
 
