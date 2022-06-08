@@ -21,7 +21,7 @@ env:
   # Skip external traffic (e.g. 1.1.1.1 and www.google.com) due to no support for IPv6 in github action
   CONFORMANCE_TEMPLATE: examples/kubernetes/connectivity-check/connectivity-check-internal.yaml
   TIMEOUT: 15m
-  LOG_TIME: 60m
+  LOG_TIME: 90m
 
 jobs:
   check_changes:
@@ -85,7 +85,7 @@ jobs:
           config: ${{ env.KIND_CONFIG }}
 
       - name: Wait for images to be available
-        timeout-minutes: 60
+        timeout-minutes: 90
         shell: bash
         run: |
           for image in cilium-ci operator-generic-ci hubble-relay-ci ; do
@@ -121,7 +121,7 @@ jobs:
             --set ingressController.enabled=true
 
           kubectl wait -n kube-system --for=condition=Ready --all pod --timeout=${{ env.TIMEOUT }}
-          # To make sure that cilium CRD is available (default timeout is 5m)
+          # To make sure that cilium CRD is available (default timeout is 15m)
           kubectl wait --for condition=Established crd/ciliumnetworkpolicies.cilium.io --timeout=15m
 
           kubectl port-forward -n kube-system deployment/hubble-relay 4245:4245 &
