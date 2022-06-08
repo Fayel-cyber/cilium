@@ -1,5 +1,5 @@
 name: Smoke Test with IPv6
-#
+#test
 
 # Any change in triggers needs to be reflected in the concurrency group.
 on:
