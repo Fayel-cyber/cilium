@@ -89,7 +89,7 @@ jobs:
         shell: bash
         run: |
           for image in cilium-ci operator-generic-ci hubble-relay-ci ; do
-            until docker manifest inspect quay.io/cilium/$image:V1.11.5 &> /dev/null; do sleep 45s; done
+            until docker manifest inspect quay.io/cilium/$image:V0.11.1 &> /dev/null; do sleep 45s; done
           done
 
       - name: Install cilium chart
@@ -100,17 +100,17 @@ jobs:
             --set kubeProxyReplacement=strict \
             --set ipam.mode=kubernetes \
             --set image.repository=quay.io/cilium/cilium-ci \
-            --set image.tag=V1.11.5 \
+            --set image.tag=V0.11.1 \
             --set image.pullPolicy=IfNotPresent \
             --set image.useDigest=false \
             --set hubble.relay.enabled=true \
             --set hubble.relay.image.repository=quay.io/cilium/hubble-relay-ci \
-            --set hubble.relay.image.tag=V1.11.5 \
+            --set hubble.relay.image.tag=V0.11.1 \
             --set hubble.relay.image.pullPolicy=IfNotPresent \
             --set hubble.relay.image.useDigest=false \
             --set operator.image.repository=quay.io/cilium/operator \
             --set operator.image.suffix=-ci \
-            --set operator.image.tag=V1.11.5 \
+            --set operator.image.tag=V0.11.1 \
             --set operator.image.pullPolicy=IfNotPresent \
             --set operator.image.useDigest=false \
             --set ipv6.enabled=true \
