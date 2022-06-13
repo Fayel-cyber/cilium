@@ -2,14 +2,12 @@ name: Cilium L4LB XDP (ci-l4lb)
 #
 # Any change in triggers needs to be reflected in the concurrency group.
 on:
-  issue_comment:
-    types:
-      - created
   pull_request: {}
   push:
     branches:
       - master
       - ft/master/**
+
 
   ### FOR TESTING PURPOSES
   # This workflow runs in the context of `master`, and ignores changes to
@@ -72,13 +70,13 @@ env:
 jobs:
   check_changes:
     name: Deduce required tests from code changes
-    if: |
-      (github.event_name == 'issue_comment' && (
-        github.event.comment.body == '/ci-l4lb' ||
-        github.event.comment.body == '/test'
-      )) ||
-      github.event_name == 'schedule' ||
-      github.event_name == 'pull_request'
+    #if: |
+      #(github.event_name == 'issue_comment' && (
+        #github.event.comment.body == '/ci-l4lb' ||
+        #github.event.comment.body == '/test'
+      #)) ||
+      #github.event_name == 'schedule' ||
+      #github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     outputs:
       tested: ${{ steps.tested-tree.outputs.src }}
