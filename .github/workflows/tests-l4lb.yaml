@@ -2,12 +2,10 @@ name: Cilium L4LB XDP (ci-l4lb)
 #
 # Any change in triggers needs to be reflected in the concurrency group.
 on:
-  issue_comment:
-    types:
-      - created
-  # Run every 6 hours
-  schedule:
-    - cron:  '0 5/6 * * *'
+  pull_request: {}
+  push:
+    branches:
+      - master
   ### FOR TESTING PURPOSES
   # This workflow runs in the context of `master`, and ignores changes to
   # workflow files in PRs. For testing changes to this workflow from a PR:
