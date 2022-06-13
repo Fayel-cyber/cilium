@@ -191,7 +191,7 @@ jobs:
         timeout-minutes: 10
         shell: bash
         run: |
-          until docker manifest inspect quay.io/cilium/cilium-ci:${{ steps.vars.outputs.sha }} &> /dev/null; do sleep 45s; done
+          until docker manifest inspect quay.io/cilium/cilium-ci:00242501847c580f93bc4f6d4ad4d939cfe65608 &> /dev/null; do sleep 45s; done
 
       - name: Run tests
         run: |
