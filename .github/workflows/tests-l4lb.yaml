@@ -1,7 +1,12 @@
 name: Cilium L4LB XDP (ci-l4lb)
 #
 # Any change in triggers needs to be reflected in the concurrency group.
-on: [push, pull_request]
+on:
+  pull_request: {}
+  push:
+    branches:
+      - master
+      - ft/master/**
 
   ### FOR TESTING PURPOSES
   # This workflow runs in the context of `master`, and ignores changes to
