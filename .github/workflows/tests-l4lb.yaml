@@ -2,6 +2,9 @@ name: Cilium L4LB XDP (ci-l4lb)
 #
 # Any change in triggers needs to be reflected in the concurrency group.
 on:
+  issue_comment:
+    types:
+      - created
   pull_request: {}
   push:
     branches:
