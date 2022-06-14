@@ -1,9 +1,11 @@
 name: CIFuzz
 #
 on:
-  pull_request:
-    paths-ignore:
-      - 'Documentation/**'
+  pull_request: {}
+  push:
+    branches:
+      - master
+      - ft/master/**
 permissions: read-all
 jobs:
   Fuzzing:
